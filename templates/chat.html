@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+    <link rel="stylesheet" href="https://cdn.rawgit.com/Chalarangelo/mini.css/v3.0.1/dist/mini-default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='estilos.css') }}">
+</head>
+
+<body>
+    <h1>Chat Server 2</h1>
+    <div id="chat-box"></div>
+    <div style="display: flex; align-items: center;">
+        <input type="text" id="message" placeholder="Type your message">
+        <button id="send-button">Send</button>
+    </div>
+
+
+    <script>
+        var socket = io();
+
+        function sendMessage() {
+            var message = document.getElementById('message').value;
+            if (message.trim() !== '') {
+                socket.emit('message', message);
+                document.getElementById('message').value = '';
+            }
+        }
+
+        socket.on('message', function(message) {
+            var chatBox = document.getElementById('chat-box');
+            var messageElement = document.createElement('p');
+            messageElement.classList.add('message');
+            messageElement.textContent = message;
+            chatBox.appendChild(messageElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        document.getElementById('send-button').addEventListener('click', sendMessage);
+        document.getElementById('message').addEventListener('keydown', function(event) {
+            if (event.keyCode === 13) {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

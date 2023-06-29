@@ -2,8 +2,10 @@ import os
 import pika
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+CORS(app)
 app.config['SECRET_KEY'] = os.urandom(24)
 socketio = SocketIO(app)
 
@@ -20,9 +22,12 @@ def connect_rabbitmq():
     channel = connection.channel()
     channel.queue_declare(queue='my_queue')
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
+@cross_origin(origins=['http://34.36.121.235'])
 def index():
     return render_template('chat.html')
+
+
 
 @socketio.on('message')
 def handle_message(message):

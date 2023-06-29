@@ -60,4 +60,4 @@ jobs:
         with:
           app-name: 'ChatDistribuidos'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_9D02AD48C1E64B4A85671F295633CE9A }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_49F692643E204061A11A1E716D75A1A9 }}

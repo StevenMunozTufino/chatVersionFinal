@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5000
 
 # Establecer la variable de entorno para Flask
-ENV FLASK_APP=main.py
+ENV FLASK_APP=app.py
 
 # Ejecutar la aplicación cuando el contenedor se inicie
 CMD ["flask", "run", "--host=0.0.0.0"]

@@ -5,7 +5,7 @@ from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
-socketio = SocketIO(app)
+socketio = SocketIO(app,cors_allowed_origins='*')
 
 # Variables globales
 connection = None

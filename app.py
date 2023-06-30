@@ -1,6 +1,3 @@
-from gevent import monkey
-monkey.patch_all()
-
 import os
 import pika
 from flask import Flask, render_template
@@ -8,7 +5,7 @@ from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
-socketio = SocketIO(app, async_mode="gevent",cors_allowed_origins='*')
+socketio = SocketIO(app,cors_allowed_origins='*')
 
 # Variables globales
 connection = None
@@ -42,4 +39,4 @@ def handle_message(message):
 
 if __name__ == '__main__':
     connect_rabbitmq()  # Establece la conexión al iniciar el programa
-    socketio.run(app, port=5000,debug=True)
+    socketio.run(app)

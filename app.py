@@ -5,7 +5,7 @@ from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
-socketio = SocketIO(app,engineio_logger=False,log_output=False, async_mode='threading')
+socketio = SocketIO(app, async_mode="gevent",cors_allowed_origins='*')
 
 # Variables globales
 connection = None

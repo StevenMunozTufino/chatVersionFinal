@@ -47,7 +47,7 @@ def handle_message(message):
 def send_queued_messages():
     while True:
         message = message_queue.get()  # Obtiene un mensaje de la cola
-        socketio.emit('message', message, broadcast=True)  # Envía el mensaje a los clientes conectados
+        socketio.emit('message', message)  # Envía el mensaje a los clientes conectados
 
 def start_consuming():
     print("Consumiendo mensajes...")

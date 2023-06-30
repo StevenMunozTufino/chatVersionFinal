@@ -34,6 +34,7 @@
             messageElement.textContent = message;
             chatBox.appendChild(messageElement);
             chatBox.scrollTop = chatBox.scrollHeight;
+            console.log("Mensaje recibido: " + message);
         });
 
         document.getElementById('send-button').addEventListener('click', sendMessage);

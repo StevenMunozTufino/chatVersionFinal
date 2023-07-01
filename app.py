@@ -12,7 +12,7 @@ socketio = SocketIO(app, cors_allowed_origins='*')
 # Variables globales
 connection = None
 channel = None
-message_queue = Queue()  # Cola para almacenar los mensajes recibidos
+#message_queue = Queue()  # Cola para almacenar los mensajes recibidos
 
 # Configura la conexión con RabbitMQ
 def connect_rabbitmq():
@@ -25,8 +25,8 @@ def connect_rabbitmq():
 
 def callback(ch, method, properties, body):
     message = body.decode()
-    print("Mensaje recibido: " + message)
-    message_queue.put(message)  # Almacena el mensaje en la cola
+    socketio.emit('message', message)  # Envía el mensaje a los clientes conectados
+    #message_queue.put(message)  # Almacena el mensaje en la cola
 
 @app.route('/')
 def index():
@@ -45,10 +45,10 @@ def handle_message(message):
     except pika.exceptions.AMQPConnectionError:
         print("Error: No se pudo conectar a RabbitMQ.")
 
-def send_queued_messages():
-    while True:
-        message = message_queue.get()  # Obtiene un mensaje de la cola
-        socketio.emit('message', message)  # Envía el mensaje a los clientes conectados
+# def send_queued_messages():
+#     while True:
+#         message = message_queue.get()  # Obtiene un mensaje de la cola
+        
 
 def start_consuming():
     print("Consumiendo mensajes...")
@@ -64,9 +64,9 @@ if __name__ == '__main__':
     consuming_thread.start()
     
     # Crea un hilo para enviar los mensajes encolados
-    send_messages_thread = threading.Thread(target=send_queued_messages)
-    send_messages_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
-    send_messages_thread.start()
+    # send_messages_thread = threading.Thread(target=send_queued_messages)
+    # send_messages_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
+    # send_messages_thread.start()
     
     # Ejecuta el socket en el hilo principal
     socketio.run(app)

@@ -25,6 +25,7 @@ def connect_rabbitmq():
 
 def callback(ch, method, properties, body):
     message = body.decode()
+    print("Mensaje recibido: " + message)
     socketio.emit('message', message)  # Envía el mensaje a los clientes conectados
     #message_queue.put(message)  # Almacena el mensaje en la cola
 

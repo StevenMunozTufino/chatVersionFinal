@@ -21,7 +21,7 @@ def connect_rabbitmq():
     parameters = pika.ConnectionParameters(host='20.232.116.211', credentials=credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
-    channel.queue_declare(queue='my_queue')
+    channel.queue_declare(queue='steven')
 
 def callback(ch, method, properties, body):
     message = body.decode()
@@ -40,7 +40,8 @@ def handle_message(message):
             connect_rabbitmq()  # Intenta reconectarse si no hay conexión o la conexión está cerrada
         
         # Envía el mensaje a la cola de RabbitMQ
-        channel.basic_publish(exchange='', routing_key='my_queue', body=message)
+        channel.basic_publish(exchange='', routing_key='steven', body=message)
+        emit('message', message, broadcast=True)  # Envía el mensaje a los clientes conectados
     except pika.exceptions.AMQPConnectionError:
         print("Error: No se pudo conectar a RabbitMQ.")
 
@@ -51,7 +52,7 @@ def send_queued_messages():
 
 def start_consuming():
     print("Consumiendo mensajes...")
-    channel.basic_consume(queue='my_queue', on_message_callback=callback, auto_ack=True)
+    channel.basic_consume(queue='alexander', on_message_callback=callback, auto_ack=True)
     channel.start_consuming()
 
 if __name__ == '__main__':

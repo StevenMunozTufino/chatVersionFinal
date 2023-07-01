@@ -72,10 +72,15 @@ def handle_message(message):
         
 
 def start_consuming():
-
-    print("Consumiendo mensajes...")
-    channelRecibir.basic_consume(queue='alexander', on_message_callback=callback, auto_ack=True)
-    channelRecibir.start_consuming()
+    while True:
+        try:
+            print("Consumiendo mensajes...")
+            channelRecibir.basic_consume(queue='alexander', on_message_callback=callback, auto_ack=True)
+            channelRecibir.start_consuming()
+        except pika.exceptions.AMQPConnectionError as e:
+            print("Error de conexión RabbitMQ:", str(e))
+            # Intenta reconectarse
+            connect_rabbitmqRecibir()
 
 if __name__ == '__main__':
     connect_rabbitmq()  # Establece la conexión al iniciar el programa

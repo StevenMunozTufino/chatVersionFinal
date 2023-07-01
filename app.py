@@ -2,23 +2,31 @@ import os
 import pika
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
+import threading
+from queue import Queue
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
-socketio = SocketIO(app)
+socketio = SocketIO(app, cors_allowed_origins='*')
 
 # Variables globales
 connection = None
 channel = None
+#message_queue = Queue()  # Cola para almacenar los mensajes recibidos
 
 # Configura la conexión con RabbitMQ
 def connect_rabbitmq():
     global connection, channel
-    credentials = pika.PlainCredentials('guest', 'guest')
-    parameters = pika.ConnectionParameters(host='localhost', credentials=credentials)
+    credentials = pika.PlainCredentials('user', 'QF1DCB!GYWpJ')
+    parameters = pika.ConnectionParameters(host='20.232.116.211', credentials=credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
-    channel.queue_declare(queue='my_queue')
+    channel.queue_declare(queue='steven')
+
+def callback(ch, method, properties, body):
+    message = body.decode()
+    socketio.emit('message', message)  # Envía el mensaje a los clientes conectados
+    #message_queue.put(message)  # Almacena el mensaje en la cola
 
 @app.route('/')
 def index():
@@ -32,11 +40,33 @@ def handle_message(message):
             connect_rabbitmq()  # Intenta reconectarse si no hay conexión o la conexión está cerrada
         
         # Envía el mensaje a la cola de RabbitMQ
-        channel.basic_publish(exchange='', routing_key='my_queue', body=message)
-        emit('message', message, broadcast=True)
+        channel.basic_publish(exchange='', routing_key='steven', body=message)
+        emit('message', message, broadcast=True)  # Envía el mensaje a los clientes conectados
     except pika.exceptions.AMQPConnectionError:
         print("Error: No se pudo conectar a RabbitMQ.")
 
+# def send_queued_messages():
+#     while True:
+#         message = message_queue.get()  # Obtiene un mensaje de la cola
+        
+
+def start_consuming():
+    print("Consumiendo mensajes...")
+    channel.basic_consume(queue='alexander', on_message_callback=callback, auto_ack=True)
+    channel.start_consuming()
+
 if __name__ == '__main__':
     connect_rabbitmq()  # Establece la conexión al iniciar el programa
-    socketio.run(app, allow_unsafe_werkzeug=True)
+    
+    # Crea un hilo para el consumo de mensajes
+    consuming_thread = threading.Thread(target=start_consuming)
+    consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
+    consuming_thread.start()
+    
+    # Crea un hilo para enviar los mensajes encolados
+    # send_messages_thread = threading.Thread(target=send_queued_messages)
+    # send_messages_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
+    # send_messages_thread.start()
+    
+    # Ejecuta el socket en el hilo principal
+    socketio.run(app)

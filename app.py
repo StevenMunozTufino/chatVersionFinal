@@ -4,12 +4,13 @@ import logging
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 import threading
-from queue import Queue
+from flask_cors import CORS
 
 app = Flask(__name__)
 # app.logger.setLevel(logging.WARNING)
 app.config['SECRET_KEY'] = os.urandom(24)
 socketio = SocketIO(app, cors_allowed_origins='*')
+CORS(app)
 
 # Variables globales
 connection = None

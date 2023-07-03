@@ -18,4 +18,4 @@ EXPOSE 5000
 
 # Ejecutar la aplicación cuando el contenedor se inicie
 #CMD ["flask", "run", "--host=0.0.0.0"]
-CMD ["python", "app.py"]
+CMD ["python", "./app.py"]

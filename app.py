@@ -4,14 +4,15 @@ import logging
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 import threading
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
 # app.logger.setLevel(logging.WARNING)
 app.config['SECRET_KEY'] = os.urandom(24)
-
+CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 socketio = SocketIO(app,cors_allowed_origins='*')
-CORS(socketio)
+
 
 # Variables globales
 connection = None
@@ -45,6 +46,7 @@ def callback(ch, method, properties, body):
     #message_queue.put(message)  # Almacena el mensaje en la cola
 
 @app.route('/')
+@cross_origin()
 def index():
     return render_template('index.html')
 

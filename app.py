@@ -9,8 +9,10 @@ from flask_cors import CORS
 app = Flask(__name__)
 # app.logger.setLevel(logging.WARNING)
 app.config['SECRET_KEY'] = os.urandom(24)
-socketio = SocketIO(app, cors_allowed_origins='*')
 CORS(app)
+socketio = SocketIO(cors_allowed_origins='*')
+socketio.init_app(app)
+
 
 # Variables globales
 connection = None

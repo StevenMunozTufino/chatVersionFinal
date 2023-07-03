@@ -8,7 +8,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 # app.logger.setLevel(logging.WARNING)
 app.config['SECRET_KEY'] = os.urandom(24)
-
 socketio = SocketIO(app,cors_allowed_origins='*')
 
 
@@ -98,5 +97,5 @@ if __name__ == '__main__':
     
     # Ejecuta el socket en el hilo principal
     port = int(os.environ.get('PORT', 5000))
-    cors = CORS(app)
-    socketio.run(app, host='0.0.0.0', port=port,cors_allowed_origins='*')
+    
+    socketio.run(app, host='0.0.0.0', port=port)

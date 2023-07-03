@@ -1,16 +1,13 @@
 import os
 import pika
-import logging
 from flask import Flask, render_template
 from flask_socketio import SocketIO, emit
 import threading
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 
 app = Flask(__name__)
 # app.logger.setLevel(logging.WARNING)
 app.config['SECRET_KEY'] = os.urandom(24)
-CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
 socketio = SocketIO(app,cors_allowed_origins='*')
 
 consuming_thread = None
@@ -47,7 +44,6 @@ def callback(ch, method, properties, body):
     #message_queue.put(message)  # Almacena el mensaje en la cola
 
 @app.route('/')
-@cross_origin()
 def index():
     return render_template('index.html')
 
@@ -104,3 +100,4 @@ def start_consuming():
 
 if __name__ == '__main__':
     socketio.run(app)
+

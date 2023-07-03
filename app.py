@@ -13,6 +13,7 @@ CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 socketio = SocketIO(app,cors_allowed_origins='*')
 
+consuming_thread = None
 
 # Variables globales
 connection = None
@@ -50,8 +51,23 @@ def callback(ch, method, properties, body):
 def index():
     return render_template('index.html')
 
+@socketio.on('connect')
+def handle_connect():
+    global consuming_thread
+    connect_rabbitmqRecibir()
+    consuming_thread = threading.Thread(target=start_consuming)
+    consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
+    consuming_thread.start()
+
+@socketio.on('disconnect')
+def handle_disconnect():
+    global consuming_thread
+    if consuming_thread is not None:
+        consuming_thread.join()  # Detener el hilo si existe
+
 @socketio.on('message')
 def handle_message(message):
+    connect_rabbitmq()
     try:
 
         # Verifica si la conexión con RabbitMQ está abierta
@@ -87,18 +103,4 @@ def start_consuming():
             connect_rabbitmqRecibir()
 
 if __name__ == '__main__':
-    connect_rabbitmq()  # Establece la conexión al iniciar el programa
-    connect_rabbitmqRecibir()
-    # Crea un hilo para el consumo de mensajes
-    consuming_thread = threading.Thread(target=start_consuming)
-    consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
-    consuming_thread.start()
-    
-    # Crea un hilo para enviar los mensajes encolados
-    # send_messages_thread = threading.Thread(target=send_queued_messages)
-    # send_messages_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
-    # send_messages_thread.start()
-    
-    # Ejecuta el socket en el hilo principal
-    port = int(os.environ.get('PORT', 5000))
-    socketio.run(app, host='0.0.0.0', port=port)
+    socketio.run(app)

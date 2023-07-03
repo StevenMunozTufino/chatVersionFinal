@@ -54,6 +54,13 @@ function sendMessage() {
     }
 }
 
+socket.on('connect', function() {
+    console.log('Connected');
+  });
+
+  socket.on('disconnect', function() {
+    console.log('Disconnected');
+  });
 
 //WebSocket para escuchar los mensajes recibidos
 socket.on('message', function(message) {

@@ -34,7 +34,7 @@ def connect_rabbitmqRecibir():
     parameters = pika.ConnectionParameters(host='20.232.116.211', credentials=credentials)
     connectionRecibir = pika.BlockingConnection(parameters)
     channelRecibir = connectionRecibir.channel()
-    channel.queue_declare(queue='alexander')
+    channelRecibir.queue_declare(queue='alexander')
 
 
 def callback(ch, method, properties, body):

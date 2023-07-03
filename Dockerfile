@@ -18,3 +18,4 @@ EXPOSE 5000
 
 # Ejecutar la aplicación cuando el contenedor se inicie
 ENTRYPOINT ["python", "app.py"]
+

@@ -96,4 +96,5 @@ if __name__ == '__main__':
     # send_messages_thread.start()
     
     # Ejecuta el socket en el hilo principal
-    socketio.run(app)
+    port = int(os.environ.get('PORT', 5000))
+    socketio.run(app, host='0.0.0.0', port=port)

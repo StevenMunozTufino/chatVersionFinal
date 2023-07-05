@@ -59,12 +59,18 @@ def handle_connect():
 @socketio.on('disconnect')
 def handle_disconnect():
     global consuming_thread
+    global connectionRecibir
+    global connection
     if consuming_thread is not None:
+        connectionRecibir.close()  # Cierra la conexión con RabbitMQ
+        connection.close()
         consuming_thread.join()  # Detener el hilo si existe
+        consuming_thread = None
+
 
 @socketio.on('message')
 def handle_message(message):
-    connect_rabbitmq()
+
     try:
 
         # Verifica si la conexión con RabbitMQ está abierta
@@ -83,11 +89,6 @@ def handle_message(message):
         print("Mensaje de error real:", str(e))
 
 
-# def send_queued_messages():
-#     while True:
-#         message = message_queue.get()  # Obtiene un mensaje de la cola
-        
-
 def start_consuming():
 
     try:
@@ -96,7 +97,7 @@ def start_consuming():
         channelRecibir.start_consuming()
     except pika.exceptions.AMQPConnectionError as e:
         print("Error de conexión RabbitMQ:", str(e))
-        # Intenta reconectarse
+            # Intenta reconectarse
         connect_rabbitmqRecibir()
 
 if __name__ == '__main__':

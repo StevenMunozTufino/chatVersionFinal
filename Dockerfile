@@ -17,4 +17,4 @@ EXPOSE 5000
 #ENV FLASK_APP=app.py
 
 # Ejecutar la aplicación cuando el contenedor se inicie
-ENTRYPOINT ["python", "app.py"]
+CMD ["flask", "run", "--host=0.0.0.0"]

@@ -87,20 +87,20 @@ def handle_message(message):
 
 
 def start_consuming():
-
-    try:
-        print("Consumiendo mensajes...")
-        if usuario == "Leon":
-            channel.basic_consume(queue='Leon', on_message_callback=callback, auto_ack=True)
-        if usuario == "Mapache":
-            channel.basic_consume(queue='Mapache', on_message_callback=callback, auto_ack=True)
-        if usuario == "Zorro":
-            channel.basic_consume(queue='Zorro', on_message_callback=callback, auto_ack=True)
-        channel.start_consuming()
-    except pika.exceptions.AMQPConnectionError as e:
-        print("Error de conexión RabbitMQ:", str(e))
-            # Intenta reconectarse
-        connect_rabbitmq()
+    while True:
+        try:
+            print("Consumiendo mensajes...")
+            if usuario == "Leon":
+                channel.basic_consume(queue='Leon', on_message_callback=callback, auto_ack=True)
+            if usuario == "Mapache":
+                channel.basic_consume(queue='Mapache', on_message_callback=callback, auto_ack=True)
+            if usuario == "Zorro":
+                channel.basic_consume(queue='Zorro', on_message_callback=callback, auto_ack=True)
+            channel.start_consuming()
+        except pika.exceptions.AMQPConnectionError as e:
+            print("Error de conexión RabbitMQ:", str(e))
+                # Intenta reconectarse
+            connect_rabbitmq()
 
 if __name__ == '__main__':
     socketio.run(app)

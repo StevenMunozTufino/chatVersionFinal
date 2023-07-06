@@ -63,7 +63,9 @@ def handle_disconnect():
 
 @socketio.on('message')
 def handle_message(message):
-
+    global connection
+    global channel
+    global usuario
     try:
 
         # Verifica si la conexión con RabbitMQ está abierta
@@ -87,20 +89,23 @@ def handle_message(message):
 
 
 def start_consuming():
-
-    try:
+    global channel
+    global connection
+    global usuario
+    while True:
+        try:
         
-        if usuario == "Leon":
-            channel.basic_consume(queue='Leon', on_message_callback=callback, auto_ack=True)
-        if usuario == "Mapache":
-            channel.basic_consume(queue='Mapache', on_message_callback=callback, auto_ack=True)
-        if usuario == "Zorro":
-            channel.basic_consume(queue='Zorro', on_message_callback=callback, auto_ack=True)
-        channel.start_consuming()
-    except pika.exceptions.AMQPConnectionError as e:
-        print("Error de conexión RabbitMQ:", str(e))
-            # Intenta reconectarse
-        connect_rabbitmq()
+            if usuario == "Leon":
+                channel.basic_consume(queue='Leon', on_message_callback=callback, auto_ack=True)
+            if usuario == "Mapache":
+                channel.basic_consume(queue='Mapache', on_message_callback=callback, auto_ack=True)
+            if usuario == "Zorro":
+                channel.basic_consume(queue='Zorro', on_message_callback=callback, auto_ack=True)
+            channel.start_consuming()
+        except pika.exceptions.AMQPConnectionError as e:
+            print("Error de conexión RabbitMQ:", str(e))
+                # Intenta reconectarse
+            connect_rabbitmq()
 
 if __name__ == '__main__':
     socketio.run(app)

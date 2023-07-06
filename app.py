@@ -1,3 +1,4 @@
+#Librerias a exportar
 import os
 import pika
 from flask import Flask, render_template
@@ -6,14 +7,12 @@ import threading
 from flask_cors import CORS
 
 app = Flask(__name__)
-
 app.config['SECRET_KEY'] = os.urandom(24)
 socketio = SocketIO(app,cors_allowed_origins='*')
 CORS(app)
 
-consuming_thread = None
-
 # Variables globales
+consuming_thread = None
 connection = None
 channel = None
 usuario = None
@@ -26,11 +25,11 @@ def connect_rabbitmq():
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
 
-
+# Callback que se ejecuta cuando se recibe un mensaje
 def callback(ch, method, properties, body):
     message = body.decode()
-    print("Mensaje recibido: " + message)
-    socketio.emit('message', message)  # Envía el mensaje a los clientes conectados
+    session_id = properties.headers.get('session_id')
+    socketio.emit('message', message,room=session_id)  # Envía el mensaje al usuario conectado
     #message_queue.put(message)  # Almacena el mensaje en la cola
 
 @app.route('/')

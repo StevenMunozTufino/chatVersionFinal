@@ -11,18 +11,12 @@ document.addEventListener('DOMContentLoaded', function() {
     $('#modalID').modal('show');
 });
 
-function guardarID() {
+function guardarID(nombrePerfil) {
+    var idUser = nombrePerfil;
+    console.log("Perfil seleccionado:", idUser);
 
-    var inputID = document.getElementById('inputID');
-    var idIngresado = inputID.value.trim();
-
-    if (idIngresado !== "") {
-        idUser = idIngresado;
-        console.log("ID ingresado:", idUser);
-
-        // Cierra el modal después de guardar el ID
-        $('#modalID').modal('hide');
-    }
+    // Cierra el modal después de guardar el perfil
+    $('#modalID').modal('hide');
 }
 
 function fecha(){

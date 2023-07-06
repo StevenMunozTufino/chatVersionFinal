@@ -159,10 +159,12 @@ position: relative;
 
 .modal {
     background-color: rgba(0, 0, 0, 0.799);
+    font-weight: bold;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 .modal-content {
     background: linear-gradient(to right, #80d9d3, #6582b9, #5151a0);
 }
 .btn-primary {
-    background-color: rgba(6, 6, 144, 0.799);
+    background-color: rgb(133, 229, 234);
 }

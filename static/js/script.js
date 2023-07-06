@@ -12,9 +12,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function guardarID(nombrePerfil) {
-    var idUser = nombrePerfil;
+    idUser = nombrePerfil;
     console.log("Perfil seleccionado:", idUser);
-
+    socket.emit('usuario', idUser); 
     // Cierra el modal después de guardar el perfil
     $('#modalID').modal('hide');
 }

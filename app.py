@@ -1,3 +1,4 @@
+#Librerias a exportar
 import os
 import pika
 from flask import Flask, render_template
@@ -6,14 +7,12 @@ import threading
 from flask_cors import CORS
 
 app = Flask(__name__)
-
 app.config['SECRET_KEY'] = os.urandom(24)
 socketio = SocketIO(app,cors_allowed_origins='*')
 CORS(app)
 
-consuming_thread = None
-
 # Variables globales
+consuming_thread = None
 connection = None
 channel = None
 usuario = None
@@ -25,24 +24,12 @@ def connect_rabbitmq():
     parameters = pika.ConnectionParameters(host='20.232.116.211', credentials=credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
-<<<<<<< HEAD
-    channel.queue_declare(queue='steven')
 
-def connect_rabbitmqRecibir():
-    global connectionRecibir, channelRecibir
-    credentials = pika.PlainCredentials('user', 'QF1DCB!GYWpJ')
-    parameters = pika.ConnectionParameters(host='20.232.116.211', credentials=credentials)
-    connectionRecibir = pika.BlockingConnection(parameters)
-    channelRecibir = connectionRecibir.channel()
-    channel.queue_declare(queue='alexander')
-=======
->>>>>>> 4d4ea46bc47676714d3ce1bc443596bf863ea094
-
-
+# Callback que se ejecuta cuando se recibe un mensaje
 def callback(ch, method, properties, body):
     message = body.decode()
-    print("Mensaje recibido: " + message)
-    socketio.emit('message', message)  # Envía el mensaje a los clientes conectados
+    session_id = properties.headers.get('session_id')
+    socketio.emit('message', message,room=session_id)  # Envía el mensaje al usuario conectado
     #message_queue.put(message)  # Almacena el mensaje en la cola
 
 @app.route('/')
@@ -75,9 +62,7 @@ def handle_disconnect():
 
 @socketio.on('message')
 def handle_message(message):
-    global connection
-    global channel
-    global usuario
+
     try:
 
         # Verifica si la conexión con RabbitMQ está abierta
@@ -86,16 +71,12 @@ def handle_message(message):
             connect_rabbitmq()  # Intenta reconectarse si no hay conexión o la conexión está cerrada
 
         # Envía el mensaje a la cola de RabbitMQ
-<<<<<<< HEAD
-        channel.basic_publish(exchange='', routing_key='steven', body=message)
-=======
         if usuario != "Leon":
             channel.basic_publish(exchange='', routing_key='Leon', body=message)
         if usuario != "Mapache":
             channel.basic_publish(exchange='', routing_key='Mapache', body=message)
         if usuario != "Zorro":
             channel.basic_publish(exchange='', routing_key='Zorro', body=message)
->>>>>>> 4d4ea46bc47676714d3ce1bc443596bf863ea094
 
         emit('message', message, broadcast=True)  # Envía el mensaje a los clientes conectados
 
@@ -105,17 +86,9 @@ def handle_message(message):
 
 
 def start_consuming():
-    global channel
-    global connection
-    global usuario
     while True:
         try:
-<<<<<<< HEAD
             print("Consumiendo mensajes...")
-            channelRecibir.basic_consume(queue='alexander', on_message_callback=callback, auto_ack=True)
-            channelRecibir.start_consuming()
-=======
-        
             if usuario == "Leon":
                 channel.basic_consume(queue='Leon', on_message_callback=callback, auto_ack=True)
             if usuario == "Mapache":
@@ -123,7 +96,6 @@ def start_consuming():
             if usuario == "Zorro":
                 channel.basic_consume(queue='Zorro', on_message_callback=callback, auto_ack=True)
             channel.start_consuming()
->>>>>>> 4d4ea46bc47676714d3ce1bc443596bf863ea094
         except pika.exceptions.AMQPConnectionError as e:
             print("Error de conexión RabbitMQ:", str(e))
                 # Intenta reconectarse

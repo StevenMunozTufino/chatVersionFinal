@@ -17,6 +17,7 @@ function guardarID(nombrePerfil) {
     socket.emit('usuario', idUser); 
     // Cierra el modal después de guardar el perfil
     $('#modalID').modal('hide');
+    
 }
 
 function fecha(){

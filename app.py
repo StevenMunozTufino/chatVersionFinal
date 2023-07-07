@@ -20,6 +20,8 @@ channel = None
 connectionRecibir = None
 channelRecibir = None
 client_id = None
+hilo=True
+
 # Configura la conexión con RabbitMQ
 def connect_rabbitmq():
     global connection, channel
@@ -63,7 +65,8 @@ def handle_connect():
 @socketio.on('disconnect')
 def handle_disconnect():
     global consuming_thread
-    global connection, channel
+    global connection, channel, hilo
+    hilo=False
     try:
         if connection and connection.is_open:
             connection.close()
@@ -100,8 +103,8 @@ def handle_message(data):
 #Para recibir mensajes
 
 def start_consuming():
-    global connectionRecibir, channelRecibir, perfil
-    while True:
+    global connectionRecibir, channelRecibir, perfil,hilo
+    while hilo:
         try:
             print("Consumiendo mensajes...")
             channelRecibir.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)

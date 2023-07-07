@@ -17,6 +17,8 @@ consuming_thread = None
 perfil = None
 connection = None
 channel = None
+connectionRecibir = None
+channelRecibir = None
 client_id = None
 # Configura la conexión con RabbitMQ
 def connect_rabbitmq():
@@ -25,6 +27,14 @@ def connect_rabbitmq():
     parameters = pika.ConnectionParameters(host='20.232.116.211', credentials=credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
+
+def connect_rabbitmqRecibir():
+    global connectionRecibir, channelRecibir
+    credentials = pika.PlainCredentials('user', 'QF1DCB!GYWpJ')
+    parameters = pika.ConnectionParameters(host='20.232.116.211', credentials=credentials)
+    connectionRecibir = pika.BlockingConnection(parameters)
+    channelRecibir = connectionRecibir.channel()
+
 
 @app.route('/')
 def index():
@@ -47,8 +57,8 @@ def handle_login(id):
 def handle_connect():
     global client_id
     client_id = request.sid
-    print("Cliente conectado: " + client_id)
     connect_rabbitmq()  # Intenta conectarse a RabbitMQ
+    connect_rabbitmqRecibir()
 
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -57,6 +67,7 @@ def handle_disconnect():
     try:
         if connection and connection.is_open:
             connection.close()
+            connectionRecibir.close()
         if consuming_thread is not None:
             consuming_thread.join()  # Detener el hilo si existe
             consuming_thread = None
@@ -89,11 +100,11 @@ def handle_message(data):
 #Para recibir mensajes
 
 def start_consuming():
-    global connection, channel, perfil
+    global connectionRecibir, channelRecibir, perfil
     try:
         print("Consumiendo mensajes...")
-        channel.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)
-        channel.start_consuming()
+        channelRecibir.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)
+        channelRecibir.start_consuming()
     except pika.exceptions.AMQPConnectionError as e:
         print("Error de conexión RabbitMQ:", str(e))
             # Intenta reconectarse

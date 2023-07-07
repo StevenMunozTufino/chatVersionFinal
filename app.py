@@ -61,6 +61,8 @@ def handle_disconnect():
     global consuming_thread
     global connectionRecibir
     global connection
+    connectionRecibir.close()  # Cierra la conexión con RabbitMQ
+    connection.close()
     if consuming_thread is not None:
         connectionRecibir.close()  # Cierra la conexión con RabbitMQ
         connection.close()

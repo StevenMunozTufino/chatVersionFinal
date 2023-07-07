@@ -98,9 +98,13 @@ def start_consuming():
 
 def callback(ch, method, properties, body):
     message = body.decode()
-    print("Mensaje recibido:", message)
-    socketio.emit('message', message)  # Envía el mensaje a los clientes conectados
-    #message_queue.put(message)  # Almacena el mensaje en la cola
+    print("Mensaje recibido: " + message)
+    
+    # Obtiene el ID de sesión del cliente actual
+    session_id = properties.headers.get('session_id')
+    
+    # Envía el mensaje solo al cliente correspondiente
+    socketio.emit('message', message, room=session_id)
 
 if __name__ == '__main__':
     socketio.run(app)

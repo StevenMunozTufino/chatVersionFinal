@@ -16,19 +16,19 @@ select.addEventListener("change", function() {
   switch (selectedAnimal) {
     case "Leon":
       animalImg.src = "../static/images/leon.png";
-      chatTitle.textContent = "Chat con León (Server 2)";
+      chatTitle.textContent = "Chat con León (Server 1)";
       break;
     case "Mapache":
       animalImg.src = "../static/images/mapache.png";
-      chatTitle.textContent = "Chat con Mapache (Server 2)";
+      chatTitle.textContent = "Chat con Mapache (Server 1)";
       break;
     case "Zorro":
       animalImg.src = "../static/images/zorro.png";
-      chatTitle.textContent = "Chat con Zorro (Server 2)";
+      chatTitle.textContent = "Chat con Zorro (Server 1)";
       break;
     default:
       animalImg.src = "../static/images/grupo.png";
-      chatTitle.textContent = "Chat en línea (Server 2)";
+      chatTitle.textContent = "Chat en línea (Server 1)";
       break;
   }
 });

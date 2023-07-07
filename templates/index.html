@@ -1,6 +1,3 @@
-
-<!------ Include the above in your HEAD tag ---------->
-
 <!DOCTYPE html>
 <html>
 	<head>
@@ -54,23 +51,13 @@
 			<div class="modal-dialog modal-dialog-centered" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-					<h5 class="modal-title" id="modalIDLabel">Elige tu perfil</h5>
+					<h5 class="modal-title" id="modalIDLabel">Ingresa tu nombre para unirte al chat ...</h5>
 					</div>
-					<div class="modal-body text-center">
-						<div class="profile-buttons">
-							<button type="button" class="btn btn-primary square-btn" onclick="guardarID('Leon')">
-								<img src="../static/images/leon.png" alt="Leon" class="animal-image"><br>
-								<span class="animal-name">Leon</span>
-							</button>
-							<button type="button" class="btn btn-primary square-btn" onclick="guardarID('Mapache')">
-								<img src="../static/images/mapache.png" alt="Mapache" class="animal-image"><br>
-								<span class="animal-name">Mapache</span>
-							</button>
-							<button type="button" class="btn btn-primary square-btn" onclick="guardarID('Zorro')">
-								<img src="../static/images/zorro.png" alt="Zorro" class="animal-image"><br>
-								<span class="animal-name">Zorro</span>
-							</button>
-						</div>
+					<div class="modal-body">
+					<input type="text" id="inputID" class="form-control" placeholder="Escribe tu nombre">
+					</div>
+					<div class="modal-footer">
+					<button type="button" class="btn btn-primary" onclick="guardarID()">Ingresar</button>
 					</div>
 				</div>
 			</div>

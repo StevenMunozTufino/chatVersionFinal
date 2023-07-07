@@ -1,4 +1,3 @@
-#Librerias a exportar
 import os
 import pika
 from flask import Flask, render_template
@@ -7,15 +6,19 @@ import threading
 from flask_cors import CORS
 
 app = Flask(__name__)
+# app.logger.setLevel(logging.WARNING)
 app.config['SECRET_KEY'] = os.urandom(24)
 socketio = SocketIO(app,cors_allowed_origins='*')
 CORS(app)
 
-# Variables globales
 consuming_thread = None
+
+# Variables globales
 connection = None
+connectionRecibir = None
 channel = None
-usuario = None
+channelRecibir = None
+#message_queue = Queue()  # Cola para almacenar los mensajes recibidos
 
 # Configura la conexión con RabbitMQ
 def connect_rabbitmq():
@@ -24,37 +27,42 @@ def connect_rabbitmq():
     parameters = pika.ConnectionParameters(host='20.232.116.211', credentials=credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
+    channel.queue_declare(queue='steven')
 
-# Callback que se ejecuta cuando se recibe un mensaje
+def connect_rabbitmqRecibir():
+    global connectionRecibir, channelRecibir
+    credentials = pika.PlainCredentials('user', 'QF1DCB!GYWpJ')
+    parameters = pika.ConnectionParameters(host='20.232.116.211', credentials=credentials)
+    connectionRecibir = pika.BlockingConnection(parameters)
+    channelRecibir = connectionRecibir.channel()
+    channelRecibir.queue_declare(queue='alexander')
+
+
 def callback(ch, method, properties, body):
     message = body.decode()
-    session_id = properties.headers.get('session_id')
-    socketio.emit('message', message,room=session_id)  # Envía el mensaje al usuario conectado
+    print("Mensaje recibido: " + message)
+    socketio.emit('message', message)  # Envía el mensaje a los clientes conectados
     #message_queue.put(message)  # Almacena el mensaje en la cola
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@socketio.on('usuario')
-def handle_connect_usuario(cliente):
-    global usuario
+@socketio.on('connect')
+def handle_connect():
     global consuming_thread
-    usuario = cliente
-    connect_rabbitmq()
+    connect_rabbitmqRecibir()
     consuming_thread = threading.Thread(target=start_consuming)
     consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
     consuming_thread.start()
 
-@socketio.on('connect')
-def handle_connect():
-    pass
-
 @socketio.on('disconnect')
 def handle_disconnect():
     global consuming_thread
+    global connectionRecibir
     global connection
     if consuming_thread is not None:
+        connectionRecibir.close()  # Cierra la conexión con RabbitMQ
         connection.close()
         consuming_thread.join()  # Detener el hilo si existe
         consuming_thread = None
@@ -70,13 +78,9 @@ def handle_message(message):
 
             connect_rabbitmq()  # Intenta reconectarse si no hay conexión o la conexión está cerrada
 
+
         # Envía el mensaje a la cola de RabbitMQ
-        if usuario != "Leon":
-            channel.basic_publish(exchange='', routing_key='Leon', body=message)
-        if usuario != "Mapache":
-            channel.basic_publish(exchange='', routing_key='Mapache', body=message)
-        if usuario != "Zorro":
-            channel.basic_publish(exchange='', routing_key='Zorro', body=message)
+        channel.basic_publish(exchange='', routing_key='steven', body=message)
 
         emit('message', message, broadcast=True)  # Envía el mensaje a los clientes conectados
 
@@ -86,20 +90,15 @@ def handle_message(message):
 
 
 def start_consuming():
-    while True:
-        try:
-            print("Consumiendo mensajes...")
-            if usuario == "Leon":
-                channel.basic_consume(queue='Leon', on_message_callback=callback, auto_ack=True)
-            if usuario == "Mapache":
-                channel.basic_consume(queue='Mapache', on_message_callback=callback, auto_ack=True)
-            if usuario == "Zorro":
-                channel.basic_consume(queue='Zorro', on_message_callback=callback, auto_ack=True)
-            channel.start_consuming()
-        except pika.exceptions.AMQPConnectionError as e:
-            print("Error de conexión RabbitMQ:", str(e))
-                # Intenta reconectarse
-            connect_rabbitmq()
+
+    try:
+        print("Consumiendo mensajes...")
+        channelRecibir.basic_consume(queue='alexander', on_message_callback=callback, auto_ack=True)
+        channelRecibir.start_consuming()
+    except pika.exceptions.AMQPConnectionError as e:
+        print("Error de conexión RabbitMQ:", str(e))
+            # Intenta reconectarse
+        connect_rabbitmqRecibir()
 
 if __name__ == '__main__':
     socketio.run(app)

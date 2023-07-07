@@ -24,6 +24,11 @@ def connect_rabbitmq():
     parameters = pika.ConnectionParameters(host='20.232.116.211', credentials=credentials)
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
+    #Crear cola
+    channel.queue_declare(queue='Leon')
+    channel.queue_declare(queue='Mapache')
+    channel.queue_declare(queue='Zorro')
+
 
 # Callback que se ejecuta cuando se recibe un mensaje
 def callback(ch, method, properties, body):
@@ -62,7 +67,7 @@ def handle_disconnect():
 
 @socketio.on('message')
 def handle_message(message):
-
+    global usuario, connection, channel
     try:
 
         # Verifica si la conexión con RabbitMQ está abierta
@@ -86,6 +91,7 @@ def handle_message(message):
 
 
 def start_consuming():
+    global usuario, connection, channel
     while True:
         try:
             print("Consumiendo mensajes...")

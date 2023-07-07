@@ -101,14 +101,15 @@ def handle_message(data):
 
 def start_consuming():
     global connectionRecibir, channelRecibir, perfil
-    try:
-        print("Consumiendo mensajes...")
-        channelRecibir.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)
-        channelRecibir.start_consuming()
-    except pika.exceptions.AMQPConnectionError as e:
-        print("Error de conexión RabbitMQ:", str(e))
-            # Intenta reconectarse
-        connect_rabbitmq()
+    while True:
+        try:
+            print("Consumiendo mensajes...")
+            channelRecibir.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)
+            channelRecibir.start_consuming()
+        except pika.exceptions.AMQPConnectionError as e:
+            print("Error de conexión RabbitMQ:", str(e))
+                # Intenta reconectarse
+            connect_rabbitmqRecibir()
 
 
 def callback(ch, method, properties, body):

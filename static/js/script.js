@@ -9,28 +9,7 @@ var chatTitle = document.getElementById("chat-title");
 // Agregar un evento de cambio al select
 select.addEventListener("change", function() {
   // Obtener el valor seleccionado
-  var selectedAnimal = select.value;
-  enviar = selectedAnimal
-  
-  // Actualizar la imagen y el título de la cabecera según el animal seleccionado
-  switch (selectedAnimal) {
-    case "Leon":
-      animalImg.src = "../static/images/leon.png";
-      chatTitle.textContent = "Chat con León (Server 1)";
-      break;
-    case "Mapache":
-      animalImg.src = "../static/images/mapache.png";
-      chatTitle.textContent = "Chat con Mapache (Server 1)";
-      break;
-    case "Zorro":
-      animalImg.src = "../static/images/zorro.png";
-      chatTitle.textContent = "Chat con Zorro (Server 1)";
-      break;
-    default:
-      animalImg.src = "../static/images/grupo.png";
-      chatTitle.textContent = "Chat en línea (Server 1)";
-      break;
-  }
+  enviar = select.value;
 });
 
 
@@ -53,7 +32,22 @@ function guardarID(nombrePerfil) {
     idUser = nombrePerfil;
     socket.emit('usuario',idUser);
     console.log("Perfil seleccionado:", idUser);
-    // Cierra el modal después de guardar el perfil
+    
+    switch (idUser) {
+        case "Leon":
+          animalImg.src = "../static/images/leon.png";
+          chatTitle.textContent = "León (Server 1)";
+          break;
+        case "Mapache":
+          animalImg.src = "../static/images/mapache.png";
+          chatTitle.textContent = "Mapache (Server 1)";
+          break;
+        case "Zorro":
+          animalImg.src = "../static/images/zorro.png";
+          chatTitle.textContent = " Zorro (Server 1)";
+          break;
+      }
+
     $('#modalID').modal('hide');
 }
 
@@ -83,14 +77,15 @@ function sendMessage() {
     var fech = fecha();
     var hor = horaH();
     if (message.trim() !== '') {
+
         mensaje = message+'@'+ fech + '@'+ hor + '@' + idUser;
-        socket.emit('message', {'profile': idUser, 'enviarA': enviar, 'message': mensaje}); //Envía a la cola
+
 
         document.getElementById('message').value = '';
         document.getElementById('message').focus();
 
-        let datos = message.split('@');
-
+        let datos = mensaje.split('@');
+        
         console.log("Mensaje Enviado");
         var chatBox = document.getElementById('chat-box');
         var messageContainer = document.createElement('div');
@@ -123,6 +118,8 @@ function sendMessage() {
         chatBox.appendChild(messageContainer);
 
         chatBox.scrollTop = chatBox.scrollHeight;
+
+        socket.emit('message', {'profile': idUser, 'enviarA': enviar, 'message': mensaje}); //Envía a la cola
     }
 }
 

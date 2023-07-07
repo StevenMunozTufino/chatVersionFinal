@@ -47,6 +47,7 @@ def handle_login(id):
 def handle_connect():
     global client_id
     client_id = request.sid
+    print("Cliente conectado: " + client_id)
     connect_rabbitmq()  # Intenta conectarse a RabbitMQ
 
 @socketio.on('disconnect')
@@ -67,6 +68,7 @@ def handle_disconnect():
 def handle_message(data):
     mensaje=data['message']
     enviarA=data['enviarA']
+    print("enviarA: ",enviarA)
     try:
 
         # Verifica si la conexión con RabbitMQ está abierta

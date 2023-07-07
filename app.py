@@ -17,7 +17,7 @@ consuming_thread = None
 perfil = None
 connection = None
 channel = None
-
+client_id = None
 # Configura la conexión con RabbitMQ
 def connect_rabbitmq():
     global connection, channel
@@ -45,6 +45,8 @@ def handle_login(id):
 #####################################################################################################################
 @socketio.on('connect')
 def handle_connect():
+    global client_id
+    client_id = request.sid
     connect_rabbitmq()  # Intenta conectarse a RabbitMQ
 
 @socketio.on('disconnect')
@@ -97,14 +99,11 @@ def start_consuming():
 
 
 def callback(ch, method, properties, body):
+    global client_id
+
     message = body.decode()
     print("Mensaje recibido: " + message)
-    client_session_id = method.consumer_tag
-    # Obtiene el ID de sesión del cliente actual
-
-    
-    # Envía el mensaje solo al cliente correspondiente
-    socketio.emit('message', message,room=client_session_id)
+    socketio.emit('message', message,room =client_id)
 
 if __name__ == '__main__':
     socketio.run(app)

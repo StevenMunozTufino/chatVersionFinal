@@ -1,6 +1,6 @@
 import os
 import pika
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit
 import threading
 from flask_cors import CORS
@@ -99,12 +99,12 @@ def start_consuming():
 def callback(ch, method, properties, body):
     message = body.decode()
     print("Mensaje recibido: " + message)
-    
+    client_session_id = method.consumer_tag
     # Obtiene el ID de sesión del cliente actual
-    session_id = properties.headers.get('session_id')
+
     
     # Envía el mensaje solo al cliente correspondiente
-    socketio.emit('message', message, room=session_id)
+    socketio.emit('message', message,room=client_session_id)
 
 if __name__ == '__main__':
     socketio.run(app)

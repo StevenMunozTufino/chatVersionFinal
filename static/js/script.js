@@ -80,14 +80,16 @@ function horaH(){
 //Función para el envío de mensajes para el texto del textarea
 function sendMessage() {
     var message = document.getElementById('message').value;
+    var fech = fecha();
+    var hor = horaH();
     if (message.trim() !== '') {
-        mensaje = message+'@'+fecha()+ '@'+ horaH() + '@' + idUser;
+        mensaje = message+'@'+ fech + '@'+ hor + '@' + idUser;
         socket.emit('message', {'profile': idUser, 'enviarA': enviar, 'message': mensaje}); //Envía a la cola
 
         document.getElementById('message').value = '';
         document.getElementById('message').focus();
 
-        var datos = message.split('@');
+        let datos = message.split('@');
 
         console.log("Mensaje Enviado");
         var chatBox = document.getElementById('chat-box');

@@ -12,7 +12,8 @@ socketio = SocketIO(app,cors_allowed_origins='*')
 CORS(app)
 
 consuming_thread = None
-
+consuming_threadM = None
+consuming_threadZ = None
 # Variables globales
 perfil = None
 connection = None
@@ -45,13 +46,20 @@ def index():
 
 @socketio.on('usuario')
 def handle_login(id):
-    global consuming_thread, perfil
+    global consuming_thread,consuming_threadM, perfil
     perfil = id
-    consuming_thread = threading.Thread(target=start_consuming)
-    consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
-    consuming_thread.start()
-
-
+    if perfil == "Leon":
+        consuming_thread = threading.Thread(target=start_consuming)
+        consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
+        consuming_thread.start()
+    if perfil == "Mapache":
+        consuming_threadM = threading.Thread(target=start_consuming)
+        consuming_threadM.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
+        consuming_threadM.start()
+    if perfil == "Zorro":
+        consuming_threadZ = threading.Thread(target=start_consuming)
+        consuming_threadZ.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
+        consuming_threadZ.start()
 
 #Conexion y desconexión de clientes
 #####################################################################################################################
@@ -64,16 +72,22 @@ def handle_connect():
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    global consuming_thread
+    global consuming_thread, consuming_threadM, consuming_threadZ, perfil
     global connection, channel, hilo
     hilo=False
     try:
         if connection and connection.is_open:
             connection.close()
-            connectionRecibir.close()
-        if consuming_thread is not None:
+            connectionRecibir.close()        
+        if perfil == "Leon":
             consuming_thread.join()  # Detener el hilo si existe
             consuming_thread = None
+        if perfil == "Mapache":
+            consuming_threadM.join()  # Detener el hilo si existe
+            consuming_threadM = None            
+        if perfil == "Zorro":
+            consuming_threadZ.join()  # Detener el hilo si existe
+            consuming_threadZ = None
     except pika.exceptions.AMQPConnectionError as e:
         handle_disconnect()
    
@@ -104,15 +118,15 @@ def handle_message(data):
 
 def start_consuming():
     global connectionRecibir, channelRecibir, perfil,hilo
-    while hilo:
-        try:
-            print("Consumiendo mensajes...")
-            channelRecibir.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)
-            channelRecibir.start_consuming()
-        except pika.exceptions.AMQPConnectionError as e:
-            print("Error de conexión RabbitMQ:", str(e))
+
+    try:
+        print("Consumiendo mensajes...")
+        channelRecibir.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)
+        channelRecibir.start_consuming()
+    except pika.exceptions.AMQPConnectionError as e:
+        print("Error de conexión RabbitMQ:", str(e))
                 # Intenta reconectarse
-            connect_rabbitmqRecibir()
+        connect_rabbitmqRecibir()
 
 
 def callback(ch, method, properties, body):
@@ -120,7 +134,7 @@ def callback(ch, method, properties, body):
 
     message = body.decode()
     print("Mensaje recibido: " + message)
-    socketio.emit('message', message,room =client_id)
+    socketio.emit('message', message,room = client_id)
 
 if __name__ == '__main__':
     socketio.run(app)

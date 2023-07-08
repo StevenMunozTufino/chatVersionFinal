@@ -131,10 +131,16 @@ socket.on('disconnect', function() {
     console.log('Desconectado del servidor');
 });
 
-//WebSocket para escuchar los mensajes recibidos
-socket.on('message', function(message) {
-    // Case para mostrar el mensaje recibido
 
+setInterval(function() {
+console.log("Enviando");
+socket.emit('recibir');
+}, 1000);
+
+//WebSocket para escuchar los mensajes recibidos
+socket.on('recibir', function(message) {
+    // Case para mostrar el mensaje recibido
+    console.log("Escuchando");
     console.log(message);
     numMensajes ++;
     const numeroElemento = document.getElementById('numero');

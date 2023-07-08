@@ -5,6 +5,8 @@ from flask_socketio import SocketIO
 import threading
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit, join_room, leave_room
+from collections import deque
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 socketio = SocketIO(app,cors_allowed_origins='*')
@@ -18,6 +20,7 @@ channel = None
 connectionRecibir = None
 channelRecibir = None
 client_id = None
+cola = deque()
 
 # Configura la conexión con RabbitMQ
 def connect_rabbitmq():
@@ -95,6 +98,14 @@ def handle_message(data):
         
         print("Mensaje de error real:", str(e))
 
+@socketio.on('recibir')
+def handle_recibir():
+    global cola
+
+    if len(cola)>0:
+        
+        emit('recibir', cola.popleft(), broadcast=False)
+
 
 #Para recibir mensajes
 
@@ -110,11 +121,12 @@ def start_consuming():
 
 
 def callback(ch, method, properties, body):
-    global client_id
+    global client_id, cola
 
     message = body.decode()
     print("Mensaje recibido: " + message)
-    socketio.emit('message', message, room=client_id)
+    cola.append(message)
+    #socketio.emit('recibir', message,broadcast=False)
 
 if __name__ == '__main__':
     socketio.run(app)

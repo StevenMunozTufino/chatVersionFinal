@@ -133,6 +133,7 @@ socket.on('disconnect', function() {
 
 //WebSocket para escuchar los mensajes recibidos
 socket.on('message', function(message) {
+    // Case para mostrar el mensaje recibido
 
     console.log(message);
     numMensajes ++;

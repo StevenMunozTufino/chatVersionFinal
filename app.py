@@ -60,9 +60,6 @@ def handle_login(id):
 @socketio.on('connect')
 def handle_connect():
     global client_id
-    session_id = session.get('session_id')  # Obtener el identificador de sesión del usuario
-    client_id =session_id
-    join_room(session_id) 
     connect_rabbitmq()  # Intenta conectarse a RabbitMQ
     connect_rabbitmqRecibir()
 
@@ -70,8 +67,6 @@ def handle_connect():
 def handle_disconnect():
     global consuming_thread
     global connection, channel
-    session_id = session.get('session_id')  # Obtener el identificador de sesión del usuario
-    leave_room(session_id) 
     try:
         if connection and connection.is_open:
             connection.close()
@@ -122,11 +117,10 @@ def start_consuming():
 
 def callback(ch, method, properties, body):
     global client_id, cola
-
     message = body.decode()
     print("Mensaje recibido: " + message)
     cola.append(message)
-    #socketio.emit('recibir', message,broadcast=False)
+
 
 if __name__ == '__main__':
     socketio.run(app)

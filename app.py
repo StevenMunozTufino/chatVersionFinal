@@ -99,7 +99,7 @@ def handle_recibir():
 
     if len(cola)>0:
         
-        emit('recibir', cola.popleft(), broadcast=False)
+        emit('recibir', cola.popleft(), broadcast=False,room=request.sid)
 
 
 #Para recibir mensajes
@@ -117,6 +117,7 @@ def start_consuming():
 
 def callback(ch, method, properties, body):
     global client_id, cola
+
     message = body.decode()
     print("Mensaje recibido: " + message)
     cola.append(message)

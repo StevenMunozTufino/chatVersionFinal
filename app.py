@@ -134,7 +134,7 @@ def callback(ch, method, properties, body):
 
     message = body.decode()
     print("Mensaje recibido: " + message)
-    socketio.send('message', message,room = client_id)
+    socketio.emit('message', message,room = client_id)
 
 if __name__ == '__main__':
     socketio.run(app)

@@ -1,27 +1,23 @@
 import os
 import pika
 from flask import Flask, render_template, request
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO
 import threading
 from flask_cors import CORS
 
 app = Flask(__name__)
-# app.logger.setLevel(logging.WARNING)
 app.config['SECRET_KEY'] = os.urandom(24)
 socketio = SocketIO(app,cors_allowed_origins='*')
 CORS(app)
 
 consuming_thread = None
-consuming_threadM = None
-consuming_threadZ = None
-# Variables globales
+
 perfil = None
 connection = None
 channel = None
 connectionRecibir = None
 channelRecibir = None
 client_id = None
-hilo=True
 
 # Configura la conexión con RabbitMQ
 def connect_rabbitmq():
@@ -46,20 +42,11 @@ def index():
 
 @socketio.on('usuario')
 def handle_login(id):
-    global consuming_thread,consuming_threadM, perfil
-    perfil = id
-    if perfil == "Leon":
-        consuming_thread = threading.Thread(target=start_consuming)
-        consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
-        consuming_thread.start()
-    if perfil == "Mapache":
-        consuming_threadM = threading.Thread(target=start_consuming)
-        consuming_threadM.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
-        consuming_threadM.start()
-    if perfil == "Zorro":
-        consuming_threadZ = threading.Thread(target=start_consuming)
-        consuming_threadZ.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
-        consuming_threadZ.start()
+    global consuming_thread
+    consuming_thread = threading.Thread(target=start_consuming)
+    consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
+    consuming_thread.start()
+   
 
 #Conexion y desconexión de clientes
 #####################################################################################################################
@@ -79,15 +66,9 @@ def handle_disconnect():
         if connection and connection.is_open:
             connection.close()
             connectionRecibir.close()        
-        if perfil == "Leon":
-            consuming_thread.join()  # Detener el hilo si existe
-            consuming_thread = None
-        if perfil == "Mapache":
-            consuming_threadM.join()  # Detener el hilo si existe
-            consuming_threadM = None            
-        if perfil == "Zorro":
-            consuming_threadZ.join()  # Detener el hilo si existe
-            consuming_threadZ = None
+        consuming_thread.join()  # Detener el hilo si existe
+        consuming_thread = None
+        
     except pika.exceptions.AMQPConnectionError as e:
         handle_disconnect()
    
@@ -98,43 +79,34 @@ def handle_message(data):
     enviarA=data['enviarA']
     print("enviarA: ",enviarA)
     try:
-
         # Verifica si la conexión con RabbitMQ está abierta
         if not connection or not connection.is_open:
-
             connect_rabbitmq()  # Intenta reconectarse si no hay conexión o la conexión está cerrada
-
-
         # Envía el mensaje a la cola de RabbitMQ
         channel.basic_publish(exchange='', routing_key=enviarA, body=mensaje)
-
-        #emit('message', message, broadcast=True)  # Envía el mensaje a los clientes conectados
-
     except pika.exceptions.AMQPConnectionError as e:
         
         print("Mensaje de error real:", str(e))
+
 
 #Para recibir mensajes
 
 def start_consuming():
     global connectionRecibir, channelRecibir, perfil,hilo
-
     try:
         print("Consumiendo mensajes...")
         channelRecibir.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)
         channelRecibir.start_consuming()
     except pika.exceptions.AMQPConnectionError as e:
         print("Error de conexión RabbitMQ:", str(e))
-                # Intenta reconectarse
         connect_rabbitmqRecibir()
 
 
 def callback(ch, method, properties, body):
     global client_id
-
     message = body.decode()
     print("Mensaje recibido: " + message)
-    socketio.emit('message', message,room = client_id)
+    socketio.send('message', message)
 
 if __name__ == '__main__':
     socketio.run(app)

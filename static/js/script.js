@@ -10,6 +10,7 @@ var chatTitle = document.getElementById("chat-title");
 select.addEventListener("change", function() {
   // Obtener el valor seleccionado
   enviar = select.value;
+  console.log("Enviar a:", enviar);
 });
 
 
@@ -135,7 +136,7 @@ socket.on('disconnect', function() {
 setInterval(function() {
 console.log("Enviando");
 socket.emit('recibir');
-}, 1000);
+}, 500);
 
 //WebSocket para escuchar los mensajes recibidos
 socket.on('recibir', function(message) {

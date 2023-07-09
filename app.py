@@ -1,24 +1,17 @@
 import os
 import pika
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template
 from flask_socketio import SocketIO
-import threading
 from flask_cors import CORS
-from flask_socketio import SocketIO, emit, join_room, leave_room
-from collections import deque
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
 socketio = SocketIO(app,cors_allowed_origins='*')
 CORS(app)
 
-perfil = None
 connection = None
 channel = None
-connectionRecibir = None
-channelRecibir = None
-client_id = None
-
 
 # Configura la conexión con RabbitMQ
 def connect_rabbitmq():
@@ -28,12 +21,7 @@ def connect_rabbitmq():
     connection = pika.BlockingConnection(parameters)
     channel = connection.channel()
 
-def connect_rabbitmqRecibir():
-    global connectionRecibir, channelRecibir
-    credentials = pika.PlainCredentials('user', 'QF1DCB!GYWpJ')
-    parameters = pika.ConnectionParameters(host='20.232.116.211', credentials=credentials)
-    connectionRecibir = pika.BlockingConnection(parameters)
-    channelRecibir = connectionRecibir.channel()
+
 
 
 
@@ -45,9 +33,6 @@ def index():
 @socketio.on('usuario')
 def handle_login(id):
     pass
-    # consuming_thread = threading.Thread(target=start_consuming)
-    # consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
-    # consuming_thread.start()
    
 
 #Conexion y desconexión de clientes
@@ -55,27 +40,14 @@ def handle_login(id):
 
 @socketio.on('connect')
 def handle_connect():
-    global client_id,cola
-    session_id = session.get('session_id')  # Obtener el identificador de sesión del usuario
-    client_id =session_id
-    join_room(session_id)
     connect_rabbitmq()  # Intenta conectarse a RabbitMQ
-    connect_rabbitmqRecibir()
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    global consuming_thread
     global connection, channel
-    session_id = session.get('session_id')  # Obtener el identificador de sesión del usuario
-    leave_room(session_id) 
-    try:
-        if connection and connection.is_open:
-            connection.close()
-            connectionRecibir.close()        
 
-        
-    except pika.exceptions.AMQPConnectionError as e:
-        handle_disconnect()
+    if connection and connection.is_open:
+        connection.close()
    
 
 @socketio.on('message')
@@ -96,16 +68,13 @@ def handle_message(data):
 @socketio.on('pedirMensajes')
 def handle_recibir(perfil):
     if perfil != None:
-        method_frame, _, body = channelRecibir.basic_get(queue=perfil, auto_ack=True)
+        method_frame, _, body = channel.basic_get(queue=perfil, auto_ack=True)
         if method_frame:
-                # Procesa el mensaje aquí
-            print("Mensaje recibido: " + body.decode())
             emit('recibir', body.decode(), broadcast=False)
         else:
-                # No se encontraron mensajes en la cola en este momento
-            print("No hay mensajes en la cola.")
+            pass
     else:
-        print("perfil es None")  
+        pass
 
 if __name__ == '__main__':
     socketio.run(app)

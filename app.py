@@ -20,7 +20,7 @@ channel = None
 connectionRecibir = None
 channelRecibir = None
 client_id = None
-cola = deque()
+cola = None
 
 # Configura la conexión con RabbitMQ
 def connect_rabbitmq():
@@ -59,10 +59,11 @@ def handle_login(id):
 
 @socketio.on('connect')
 def handle_connect():
-    global client_id
+    global client_id,cola
     session_id = session.get('session_id')  # Obtener el identificador de sesión del usuario
     client_id =session_id
-    join_room(session_id) 
+    join_room(session_id)
+    cola = deque()
     connect_rabbitmq()  # Intenta conectarse a RabbitMQ
     connect_rabbitmqRecibir()
 

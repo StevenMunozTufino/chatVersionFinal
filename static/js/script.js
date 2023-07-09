@@ -139,11 +139,12 @@ socket.emit('recibir');
 }, 500);
 
 //WebSocket para escuchar los mensajes recibidos
-socket.on('recibir', function(message) {
+socket.on('recibir', function(data) {
     // Case para mostrar el mensaje recibido
-
-    console.log("Escuchando");
-    console.log(message);
+    message=data.mensaje;
+    usuarioID=data.id;
+    var user_id=socket.id;
+    if (usuarioID == user_id){
     numMensajes ++;
     const numeroElemento = document.getElementById('numero');
     numeroElemento.textContent = numMensajes + ' Mensajes';
@@ -182,6 +183,7 @@ socket.on('recibir', function(message) {
     chatBox.appendChild(messageContainer);
 
     chatBox.scrollTop = chatBox.scrollHeight;
+    }
 });
 
 document.getElementById('send-button').addEventListener('click', sendMessage);

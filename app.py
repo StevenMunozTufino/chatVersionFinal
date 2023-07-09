@@ -98,7 +98,7 @@ def handle_recibir():
     global cola
 
     if len(cola)>0:
-        
+        print(request.sid)      
         emit('recibir', cola.popleft(), broadcast=False,room=request.sid)
 
 

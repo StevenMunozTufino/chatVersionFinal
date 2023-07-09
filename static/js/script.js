@@ -141,6 +141,7 @@ socket.emit('recibir');
 //WebSocket para escuchar los mensajes recibidos
 socket.on('recibir', function(message) {
     // Case para mostrar el mensaje recibido
+
     console.log("Escuchando");
     console.log(message);
     numMensajes ++;

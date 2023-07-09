@@ -12,15 +12,13 @@ app.config['SECRET_KEY'] = os.urandom(24)
 socketio = SocketIO(app,cors_allowed_origins='*')
 CORS(app)
 
-consuming_thread = None
-
 perfil = None
 connection = None
 channel = None
 connectionRecibir = None
 channelRecibir = None
 client_id = None
-cola = None
+
 
 # Configura la conexión con RabbitMQ
 def connect_rabbitmq():
@@ -49,9 +47,9 @@ def handle_login(id):
     global perfil, consuming_thread
     perfil = id
     print("perfil: ",perfil)
-    consuming_thread = threading.Thread(target=start_consuming)
-    consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
-    consuming_thread.start()
+    # consuming_thread = threading.Thread(target=start_consuming)
+    # consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
+    # consuming_thread.start()
    
 
 #Conexion y desconexión de clientes
@@ -102,32 +100,37 @@ def handle_message(data):
 @socketio.on('recibir')
 def handle_recibir():
     global cola
-
-    if len(cola)>0:
+    method_frame, _, body = channelRecibir.basic_get(queue=perfil, auto_ack=True)
+    if method_frame:
+                # Procesa el mensaje aquí
+        print("Mensaje recibido: " + body)
+        emit('recibir', body, broadcast=False)
+    else:
+                # No se encontraron mensajes en la cola en este momento
+        print("No hay mensajes en la cola.")
         
-        emit('recibir', cola.popleft(), broadcast=False)
 
 
 #Para recibir mensajes
 
-def start_consuming():
-    global connectionRecibir, channelRecibir, perfil
-    try:
-        print("Consumiendo mensajes..."+perfil)
-        channelRecibir.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)
-        channelRecibir.start_consuming()
-    except pika.exceptions.AMQPConnectionError as e:
-        print("Error de conexión RabbitMQ:", str(e))
-        connect_rabbitmqRecibir()
+# def start_consuming():
+#     global connectionRecibir, channelRecibir, perfil
+#     try:
+#         print("Consumiendo mensajes..."+perfil)
+#         channelRecibir.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)
+#         channelRecibir.start_consuming()
+#     except pika.exceptions.AMQPConnectionError as e:
+#         print("Error de conexión RabbitMQ:", str(e))
+#         connect_rabbitmqRecibir()
 
 
-def callback(ch, method, properties, body):
-    global client_id, cola
+# def callback(ch, method, properties, body):
+#     global client_id, cola
 
-    message = body.decode()
-    print("Mensaje recibido: " + message)
-    cola.append(message)
-    #socketio.emit('recibir', message,broadcast=False)
+#     message = body.decode()
+#     print("Mensaje recibido: " + message)
+#     cola.append(message)
+#     #socketio.emit('recibir', message,broadcast=False)
 
 if __name__ == '__main__':
     socketio.run(app)

@@ -75,8 +75,7 @@ def handle_disconnect():
         if connection and connection.is_open:
             connection.close()
             connectionRecibir.close()        
-        consuming_thread.join()  # Detener el hilo si existe
-        consuming_thread = None
+
         
     except pika.exceptions.AMQPConnectionError as e:
         handle_disconnect()
@@ -103,34 +102,12 @@ def handle_recibir():
     method_frame, _, body = channelRecibir.basic_get(queue=perfil, auto_ack=True)
     if method_frame:
                 # Procesa el mensaje aquí
-        print("Mensaje recibido: " + body)
-        emit('recibir', body, broadcast=False)
+        print("Mensaje recibido: " + body.decode())
+        emit('recibir', body.decode(), broadcast=False)
     else:
                 # No se encontraron mensajes en la cola en este momento
         print("No hay mensajes en la cola.")
         
-
-
-#Para recibir mensajes
-
-# def start_consuming():
-#     global connectionRecibir, channelRecibir, perfil
-#     try:
-#         print("Consumiendo mensajes..."+perfil)
-#         channelRecibir.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)
-#         channelRecibir.start_consuming()
-#     except pika.exceptions.AMQPConnectionError as e:
-#         print("Error de conexión RabbitMQ:", str(e))
-#         connect_rabbitmqRecibir()
-
-
-# def callback(ch, method, properties, body):
-#     global client_id, cola
-
-#     message = body.decode()
-#     print("Mensaje recibido: " + message)
-#     cola.append(message)
-#     #socketio.emit('recibir', message,broadcast=False)
 
 if __name__ == '__main__':
     socketio.run(app)

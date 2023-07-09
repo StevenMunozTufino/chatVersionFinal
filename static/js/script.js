@@ -134,7 +134,7 @@ socket.on('disconnect', function() {
 
 setInterval(function() {
 console.log("Enviando");
-socket.emit('recibir');
+socket.emit('pedirMensajes', idUser);
 }, 1000);
 
 //WebSocket para escuchar los mensajes recibidos

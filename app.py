@@ -44,9 +44,7 @@ def index():
 
 @socketio.on('usuario')
 def handle_login(id):
-    global perfil, consuming_thread
-    perfil = id
-    print("perfil: ",perfil)
+    pass
     # consuming_thread = threading.Thread(target=start_consuming)
     # consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
     # consuming_thread.start()
@@ -61,7 +59,6 @@ def handle_connect():
     session_id = session.get('session_id')  # Obtener el identificador de sesión del usuario
     client_id =session_id
     join_room(session_id)
-    cola = deque()
     connect_rabbitmq()  # Intenta conectarse a RabbitMQ
     connect_rabbitmqRecibir()
 
@@ -96,18 +93,19 @@ def handle_message(data):
         
         print("Mensaje de error real:", str(e))
 
-@socketio.on('recibir')
-def handle_recibir():
-    global cola
-    method_frame, _, body = channelRecibir.basic_get(queue=perfil, auto_ack=True)
-    if method_frame:
+@socketio.on('pedirMensajes')
+def handle_recibir(perfil):
+    if perfil != None:
+        method_frame, _, body = channelRecibir.basic_get(queue=perfil, auto_ack=True)
+        if method_frame:
                 # Procesa el mensaje aquí
-        print("Mensaje recibido: " + body.decode())
-        emit('recibir', body.decode(), broadcast=False)
-    else:
+            print("Mensaje recibido: " + body.decode())
+            emit('recibir', body.decode(), broadcast=False)
+        else:
                 # No se encontraron mensajes en la cola en este momento
-        print("No hay mensajes en la cola.")
-        
+            print("No hay mensajes en la cola.")
+    else:
+        print("perfil es None")  
 
 if __name__ == '__main__':
     socketio.run(app)

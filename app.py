@@ -48,7 +48,6 @@ def index():
 def handle_login(id):
     global perfil, consuming_thread
     perfil = id
-    
     print("perfil: ",perfil)
     consuming_thread = threading.Thread(target=start_consuming)
     consuming_thread.daemon = True  # El hilo se detendrá cuando el programa principal se cierre
@@ -61,6 +60,9 @@ def handle_login(id):
 @socketio.on('connect')
 def handle_connect():
     global client_id
+    session_id = session.get('session_id')  # Obtener el identificador de sesión del usuario
+    client_id =session_id
+    join_room(session_id) 
     connect_rabbitmq()  # Intenta conectarse a RabbitMQ
     connect_rabbitmqRecibir()
 
@@ -68,6 +70,8 @@ def handle_connect():
 def handle_disconnect():
     global consuming_thread
     global connection, channel
+    session_id = session.get('session_id')  # Obtener el identificador de sesión del usuario
+    leave_room(session_id) 
     try:
         if connection and connection.is_open:
             connection.close()
@@ -83,13 +87,12 @@ def handle_disconnect():
 def handle_message(data):
     mensaje=data['message']
     enviarA=data['enviarA']
-    
+    print("enviarA: ",enviarA)
     try:
         # Verifica si la conexión con RabbitMQ está abierta
         if not connection or not connection.is_open:
             connect_rabbitmq()  # Intenta reconectarse si no hay conexión o la conexión está cerrada
         # Envía el mensaje a la cola de RabbitMQ
-
         channel.basic_publish(exchange='', routing_key=enviarA, body=mensaje)
     except pika.exceptions.AMQPConnectionError as e:
         
@@ -100,8 +103,8 @@ def handle_recibir():
     global cola
 
     if len(cola)>0:
-        print(request.sid)      
-        emit('recibir', {'mensaje':cola.popleft(),'id':request.sid})
+        
+        emit('recibir', cola.popleft(), broadcast=False)
 
 
 #Para recibir mensajes
@@ -109,7 +112,6 @@ def handle_recibir():
 def start_consuming():
     global connectionRecibir, channelRecibir, perfil
     try:
-        
         print("Consumiendo mensajes..."+perfil)
         channelRecibir.basic_consume(queue=perfil, on_message_callback=callback, auto_ack=True)
         channelRecibir.start_consuming()
@@ -124,7 +126,7 @@ def callback(ch, method, properties, body):
     message = body.decode()
     print("Mensaje recibido: " + message)
     cola.append(message)
-
+    #socketio.emit('recibir', message,broadcast=False)
 
 if __name__ == '__main__':
     socketio.run(app)

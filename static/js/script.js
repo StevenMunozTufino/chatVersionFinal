@@ -10,7 +10,6 @@ var chatTitle = document.getElementById("chat-title");
 select.addEventListener("change", function() {
   // Obtener el valor seleccionado
   enviar = select.value;
-  console.log("Enviar a:", enviar);
 });
 
 
@@ -136,15 +135,13 @@ socket.on('disconnect', function() {
 setInterval(function() {
 console.log("Enviando");
 socket.emit('recibir');
-}, 500);
+}, 1000);
 
 //WebSocket para escuchar los mensajes recibidos
-socket.on('recibir', function(data) {
+socket.on('recibir', function(message) {
     // Case para mostrar el mensaje recibido
-    message=data.mensaje;
-    usuarioID=data.id;
-    var user_id=socket.id;
-    if (usuarioID == user_id){
+    console.log("Escuchando");
+    console.log(message);
     numMensajes ++;
     const numeroElemento = document.getElementById('numero');
     numeroElemento.textContent = numMensajes + ' Mensajes';
@@ -183,7 +180,6 @@ socket.on('recibir', function(data) {
     chatBox.appendChild(messageContainer);
 
     chatBox.scrollTop = chatBox.scrollHeight;
-    }
 });
 
 document.getElementById('send-button').addEventListener('click', sendMessage);

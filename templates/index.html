@@ -1,3 +1,6 @@
+
+<!------ Include the above in your HEAD tag ---------->
+
 <!DOCTYPE html>
 <html>
 	<head>
@@ -22,13 +25,24 @@
 						<div class="card-header msg_head">
 							<div class="d-flex bd-highlight">
 								<div class="img_cont">
-									<img src="../static/images/grupo.png" class="rounded-circle user_img">
+									<img id="animal-img" src="../static/images/grupo.png" class="rounded-circle user_img">
 									<span class="online_icon"></span>
 								</div>
 								<div class="user_info">
-									<span>Chat en línea (Server 2)</span>
+									<span id="chat-title">Server2</span>
+									<span id="sesion"></span>
 									<p id="numero">0 Mensajes</p>
 								</div>
+								<div class="ml-auto">
+									<div class="form-group">
+									  <select class="form-control" id="animal-select" title="Elige con quién chatear ...">
+										<!-- <option  disabled selected value="" style="font-weight: bold; color: rgb(255, 255, 255);">Seleccione un usuario</option> -->
+										<option value="Leon">Leon</option>
+										<option value="Mapache">Mapache</option>
+										<option value="Zorro">Zorro</option>
+									  </select>
+									</div>
+								</div>								  
 							</div>
 						</div>
 						<div class="card-body msg_card_body chat-box" id="chat-box">
@@ -51,13 +65,23 @@
 			<div class="modal-dialog modal-dialog-centered" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-					<h5 class="modal-title" id="modalIDLabel">Ingresa tu nombre para unirte al chat ...</h5>
+						<h5 class="modal-title" id="modalIDLabel">Elige tu perfil</h5>
 					</div>
-					<div class="modal-body">
-					<input type="text" id="inputID" class="form-control" placeholder="Escribe tu nombre">
-					</div>
-					<div class="modal-footer">
-					<button type="button" class="btn btn-primary" onclick="guardarID()">Ingresar</button>
+					<div class="modal-body text-center">
+						<div class="profile-buttons">
+							<button type="button" class="btn btn-primary square-btn" onclick="guardarID('Leon')">
+								<img src="../static/images/leon.png" alt="Perro" class="animal-image"> <br>
+								<span class="animal-name">León</span>
+							</button>
+							<button type="button" class="btn btn-primary square-btn" onclick="guardarID('Mapache')">
+								<img src="../static/images/mapache.png" alt="Gato" class="animal-image"> <br>
+								<span class="animal-name">Mapache</span>
+							</button>
+							<button type="button" class="btn btn-primary square-btn" onclick="guardarID('Zorro')">
+								<img src="../static/images/zorro.png" alt="Pájaro" class="animal-image"> <br>
+								<span class="animal-name">Zorro</span>
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>

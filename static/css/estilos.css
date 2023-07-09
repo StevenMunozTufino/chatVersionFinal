@@ -159,12 +159,35 @@ position: relative;
 
 .modal {
     background-color: rgba(0, 0, 0, 0.799);
-    font-weight: bold;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
 .modal-content {
     background: linear-gradient(to right, #80d9d3, #6582b9, #5151a0);
 }
 .btn-primary {
-    background-color: rgb(133, 229, 234);
+    background-color: rgba(6, 6, 144, 0.799);
+}
+
+ /* Estilos para el combobox */
+
+#animal-select {
+    margin-top: 20px;
+    background: linear-gradient(to right, #608f8c, #3a4862, #333360);
+    color: white;
+    font-weight: bold;
+    appearance: none;
+}
+
+#animal-select:hover{
+    appearance: none;
+    font-weight: bold;
+}
+
+#animal-select:focus {
+    background-color: #2e6665;
+    font-weight: bold;
+}
+
+#animal-select::after {
+    border-color: #aad8d7 !important;
+    font-weight: bold;
 }
